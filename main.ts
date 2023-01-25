@@ -80,31 +80,14 @@ function getRandomPoint() {
 }
 
 function drawSnakeAndCandy() {
-    /* Super naief en traag*/
-    let x = 0
-    let y = 0;
-    let ledx = 0;
-    let ledy = 0;
     let i = 0;
-    candyLedX = -1;
-    candyLedY = -1;
-    for (x=viewPointX; x<viewPointX+5;x++) {
-        ledy=0;
-        for (y=viewPointY; y<viewPointY+5;y++) {
-            for (i=0; i < snakePartsX.length; i++) {
-                if (snakePartsX[i]==x && snakePartsY[i]==y) {
-                    led.plotBrightness(ledx,ledy, (i+1)/snakePartsX.length*255)
-                }
-            }
-            if (x == candyX && y == candyY) {
-                led.plotBrightness(ledx, ledy, 10)
-                candyLedX = ledx
-                candyLedY = ledy
-            }
-            ledy++;
-        }
-        ledx++
+    
+    for (i = 0; i < snakePartsX.length; i++) {
+        led.plotBrightness(snakePartsX[i]-viewPointX, snakePartsY[i]-viewPointY, (i + 1) / snakePartsX.length * 255)
     }
+
+    candyLedX = candyX - viewPointX
+    candyLedY = candyY - viewPointY
 }
 
 function getSnakeHead() {
