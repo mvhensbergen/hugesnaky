@@ -318,7 +318,9 @@ basic.forever(function () {
             snakePartsX.push(newPosition[0])
             snakePartsY.push(newPosition[1])
             makeCandy();
-            gameSpeed-=55;
+            if (gameSpeed>500) {
+                gameSpeed-=55;
+            }
             score ++
         }
     }
