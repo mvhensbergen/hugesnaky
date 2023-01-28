@@ -84,11 +84,6 @@ function getRandomPoint() {
 }
 
 function drawCompassess() {
-    let compassessBrightness = 10;
-
-    let headX = getSnakeHead()[0]
-    let headY = getSnakeHead()[1]
-
     // Candy to the left
     if ( candyLedX < 0 ) {
         if ( candyLedY < 0 ) {
