@@ -1,8 +1,7 @@
-/* kop = rechts */
 let snakePartsX: number[] = [];
 let snakePartsY: number[] = [];
 
-let gameSpeed = 1000;
+let gamePause = 1000;
 
 let mazeSize = 12;
 let score = 0
@@ -132,12 +131,25 @@ function drawCompassess() {
     compassesY = -1;
 }
 
-function drawSnakeAndCandy() {
+function removeSnake() {
     let i = 0;
-    
+
     for (i = 0; i < snakePartsX.length; i++) {
-        led.plotBrightness(snakePartsX[i]-viewPointX, snakePartsY[i]-viewPointY, (i + 1) / snakePartsX.length * 255)
+        led.unplot(snakePartsX[i] - viewPointX, snakePartsY[i] - viewPointY)
     }
+}
+
+function drawSnake() {
+    let i = 0;
+
+    for (i = 0; i < snakePartsX.length; i++) {
+        let brightness = (i + 1) / snakePartsX.length * 255;
+        led.plotBrightness(snakePartsX[i] - viewPointX, snakePartsY[i] - viewPointY, brightness)
+    }
+}
+
+function drawGame() {
+    drawSnake()
 
     candyLedX = candyX - viewPointX
     candyLedY = candyY - viewPointY
@@ -161,11 +173,6 @@ function partOfSnake(t: number[]) {
 }
 
 function illegalPosition(t: number[]) {
-    // Do I collide with candy?
-    if (t[0] == candyX && t[1] == candyY) {
-        return false;
-    }
-
     // Do I collide with wall?
     if (isBorder(t[0], t[1])) {
         return true;
@@ -213,7 +220,7 @@ function resetGame() {
     led.plotAll()
     led.toggleAll()
 
-    gameSpeed = 1000
+    gamePause = 1000
     score = 0
 
     gameInProgress = true;
@@ -295,19 +302,19 @@ input.onButtonPressed(Button.B, function () {
 basic.forever(function () {
     gameInProgress = true
     drawViewPort()
-    drawSnakeAndCandy()
+    drawGame()
     music.playTone(262, music.beat(BeatFraction.Eighth))
-    basic.pause(gameSpeed)
+    basic.pause(gamePause)
+    removeSnake()
+    basic.pause(50)
     
     let headPosition = getSnakeHead()
     let newPosition = getNewPosition(headPosition, currentDirection)
-    //currentDirection = Math.randomRange(0, 3)
-
+    
     let count = 0;
     if (illegalPosition(newPosition)) {    
         gameInProgress = false;
         led.unplot(candyX, candyY)
-        //led.setBrightness(candyLedX,candyLedY,255)
         basic.showNumber(score)
         basic.pause(2000)
         resetGame();
@@ -318,13 +325,12 @@ basic.forever(function () {
             snakePartsX.push(newPosition[0])
             snakePartsY.push(newPosition[1])
             makeCandy();
-            if (gameSpeed>500) {
-                gameSpeed-=55;
+            if (gamePause>500) {
+                gamePause-=55;
             }
             score ++
         }
     }
-    
 })
 
 
