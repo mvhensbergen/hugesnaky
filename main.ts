@@ -4,13 +4,16 @@ let snakePartsY: number[] = [];
 
 let gameSpeed = 1000;
 
-let mazeSize = 8;
+let mazeSize = 12;
 let score = 0
 
 let candyX = 0;
 let candyY = 0;
 let candyLedX = 0;
 let candyLedY = 0;
+
+let compassesX = 0;
+let compassesY = 0;
 
 let viewPointX = 0;
 let viewPointY = 0;
@@ -60,6 +63,7 @@ function drawViewPort() {
                 led.plot(i,j)
             } else {
                 led.unplot(i,j)
+                // led.brightness(i,j, 255)
             }
         }
     }
@@ -79,6 +83,60 @@ function getRandomPoint() {
     return [x, y]
 }
 
+function drawCompassess() {
+    let compassessBrightness = 10;
+
+    let headX = getSnakeHead()[0]
+    let headY = getSnakeHead()[1]
+
+    // Candy to the left
+    if ( candyLedX < 0 ) {
+        if ( candyLedY < 0 ) {
+            compassesX = 0;
+            compassesY = 0;
+            return;
+        }
+        if (candyLedY > 4) {
+            compassesX = 0;
+            compassesY = 4;
+            return;
+        }
+        compassesX = 0;
+        compassesY = 2;
+        return
+    }
+
+    // Candy to the right
+    if (candyLedX > 4 ) {
+        if (candyLedY < 0) {
+            compassesX = 4;
+            compassesY = 0;
+            return;
+        }
+        if (candyLedY > 4) {
+            compassesX = 4;
+            compassesY = 4;
+            return;
+        }
+        compassesX = 4;
+        compassesY = 2;
+        return
+    }
+
+    if (candyLedY < 0 ) {
+        compassesX = 2;
+        compassesY = 0;
+        return
+    }
+    if (candyLedY > 4) {
+        compassesX = 2;
+        compassesY = 4;
+        return
+    }
+    compassesX = -1;
+    compassesY = -1;
+}
+
 function drawSnakeAndCandy() {
     let i = 0;
     
@@ -88,6 +146,8 @@ function drawSnakeAndCandy() {
 
     candyLedX = candyX - viewPointX
     candyLedY = candyY - viewPointY
+
+    drawCompassess();
 }
 
 function getSnakeHead() {
@@ -186,6 +246,19 @@ basic.forever(function () {
     }
 })
 
+basic.forever(function () {
+    if (gameInProgress) {
+        led.plotBrightness(compassesX, compassesY, 10)
+        basic.pause(50);
+        led.plotBrightness(compassesX, compassesY, 30);
+        basic.pause(50);
+        led.plotBrightness(compassesX, compassesY, 50)
+        basic.pause(50);
+        led.plotBrightness(compassesX, compassesY, 70);
+        basic.pause(50);
+    }
+})
+
 input.onButtonPressed(Button.A, function() {
     if (currentDirection == Dir.UP) {
         currentDirection = Dir.LEFT
@@ -239,6 +312,7 @@ basic.forever(function () {
     if (illegalPosition(newPosition)) {    
         gameInProgress = false;
         led.unplot(candyX, candyY)
+        //led.setBrightness(candyLedX,candyLedY,255)
         basic.showNumber(score)
         basic.pause(2000)
         resetGame();
