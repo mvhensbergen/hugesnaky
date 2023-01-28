@@ -3,7 +3,7 @@ let snakePartsY: number[] = [];
 
 let gamePause = 1000;
 
-let mazeSize = 12;
+let mazeSize = 15;
 let score = 0
 
 let candyX = 0;
@@ -230,7 +230,7 @@ function resetGame() {
 
     // let startSnake = getRandomPoint()
     snakePartsX.push(1)
-    snakePartsY.push(mazeSize/2)
+    snakePartsY.push(Math.floor(mazeSize/2))
 
     currentDirection = Dir.RIGHT
 
