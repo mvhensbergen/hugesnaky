@@ -1,9 +1,11 @@
 let snakePartsX: number[] = [];
 let snakePartsY: number[] = [];
 
-let gamePause = 1000;
+let gamePause = 250;
 
-let mazeSize = 15;
+let autoPlay = false;
+
+let mazeSize = 8;
 let score = 0
 
 let candyX = 0;
@@ -59,7 +61,7 @@ function drawViewPort() {
     for (i=0; i < 5; i++) {
         for (j=0; j<5; j++) {
             if (isBorder(x+i,y+j)) {
-                led.plot(i,j)
+                led.plotBrightness(i,j, 10)
             } else {
                 led.unplot(i,j)
                 // led.brightness(i,j, 255)
@@ -228,7 +230,6 @@ function resetGame() {
     snakePartsX = []
     snakePartsY = []
 
-    // let startSnake = getRandomPoint()
     snakePartsX.push(1)
     snakePartsY.push(Math.floor(mazeSize/2))
 
@@ -299,6 +300,57 @@ input.onButtonPressed(Button.B, function () {
     }
 })
 
+input.onButtonPressed(Button.AB, function() {
+    autoPlay = !autoPlay
+
+    gamePause = 1000
+})
+
+function gameOver() {
+    gameInProgress = false;
+    led.unplot(candyX, candyY)
+    basic.showNumber(score)
+    basic.pause(2000)
+    resetGame();
+}
+
+function getPossibleDirections() {
+    let myPossibleDirections: number[] = []
+    let allDirections = [Dir.RIGHT, Dir.LEFT, Dir.UP, Dir.DOWN]
+    let i = 0;
+    for (i = 0; i < 4; i++) {
+        let dir = allDirections[i]
+        let newPosition = getNewPosition(getSnakeHead(), dir)
+        if (!illegalPosition(newPosition)) {
+            myPossibleDirections.push(dir)
+        }
+    }
+    return myPossibleDirections
+}
+
+function suggestDirection(possibleDirections: number[]) {
+    let headPosition = getSnakeHead()
+    let i = 0
+    let newdirection = -1;
+
+    for (i = 0; i < possibleDirections.length; i++) {
+        let dir = possibleDirections[i]
+        if (dir == Dir.LEFT && candyX < headPosition[0]) {
+            newdirection = dir;
+        }
+        if (dir == Dir.RIGHT && candyX > headPosition[0]) {
+            newdirection = dir;
+        }
+        if (dir == Dir.UP && candyY < headPosition[1]) {
+            newdirection = dir;
+        }
+        if (dir == Dir.DOWN && candyY > headPosition[1]) {
+            newdirection = dir;
+        }
+    }
+    return newdirection;
+}
+
 basic.forever(function () {
     gameInProgress = true
     drawViewPort()
@@ -309,27 +361,39 @@ basic.forever(function () {
     basic.pause(50)
     
     let headPosition = getSnakeHead()
-    let newPosition = getNewPosition(headPosition, currentDirection)
+    let newPosition : number[]
     
-    let count = 0;
-    if (illegalPosition(newPosition)) {    
-        gameInProgress = false;
-        led.unplot(candyX, candyY)
-        basic.showNumber(score)
-        basic.pause(2000)
-        resetGame();
-    } else {
-        moveSnake(newPosition)
-        if (newPosition[0] == candyX && newPosition[1] == candyY) {
-            music.playSoundEffect(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), SoundExpressionPlayMode.UntilDone)
-            snakePartsX.push(newPosition[0])
-            snakePartsY.push(newPosition[1])
-            makeCandy();
-            if (gamePause>500) {
-                gamePause-=55;
-            }
-            score ++
+    if (!autoPlay) {
+        newPosition = getNewPosition(headPosition, currentDirection)
+        if (illegalPosition(newPosition)) {
+            gameOver();
         }
+    } else {
+        let possibleDirections = getPossibleDirections()
+        if (possibleDirections.length == 0) {
+            gameOver();
+        }
+
+        let newdirection = suggestDirection(possibleDirections)
+        if (newdirection == -1) {
+            newdirection = possibleDirections[Math.randomRange(0, possibleDirections.length)]
+        }
+
+        newPosition = getNewPosition(headPosition, newdirection)
+
+        gamePause = 150
+    }
+       
+    moveSnake(newPosition)
+    if (newPosition[0] == candyX && newPosition[1] == candyY) {
+        music.playSoundEffect(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), SoundExpressionPlayMode.UntilDone)
+        snakePartsX.push(newPosition[0])
+        snakePartsY.push(newPosition[1])
+        makeCandy();
+        if (gamePause>500) {
+            gamePause-=55;
+        }
+        score ++
     }
 })
 
