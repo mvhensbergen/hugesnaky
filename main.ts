@@ -145,7 +145,7 @@ function drawSnake() {
     let i = 0;
 
     for (i = 0; i < snakePartsX.length; i++) {
-        let brightness = 100
+        let brightness = 10
         if ( i == snakePartsX.length - 1 ) { brightness = 255 }
         led.plotBrightness(snakePartsX[i] - viewPointX, snakePartsY[i] - viewPointY, brightness)
     }
