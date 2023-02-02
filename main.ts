@@ -145,7 +145,8 @@ function drawSnake() {
     let i = 0;
 
     for (i = 0; i < snakePartsX.length; i++) {
-        let brightness = (i + 1) / snakePartsX.length * 255;
+        let brightness = 100
+        if ( i == snakePartsX.length - 1 ) { brightness = 255 }
         led.plotBrightness(snakePartsX[i] - viewPointX, snakePartsY[i] - viewPointY, brightness)
     }
 }
@@ -225,13 +226,13 @@ function resetGame() {
     gamePause = 1000
     score = 0
 
-    gameInProgress = true;
-
     snakePartsX = []
     snakePartsY = []
 
     snakePartsX.push(1)
     snakePartsY.push(Math.floor(mazeSize/2))
+
+    gameInProgress = true;
 
     currentDirection = Dir.RIGHT
 
@@ -244,7 +245,7 @@ basic.forever(function () {
     if (gameInProgress) {
         led.plotBrightness(candyLedX, candyLedY, 255)
         basic.pause(100);
-        led.plotBrightness(candyLedX, candyLedY, 10);
+        led.plotBrightness(candyLedX, candyLedY, 0);
         basic.pause(100);
     }
 })
@@ -253,11 +254,9 @@ basic.forever(function () {
     if (gameInProgress) {
         led.plotBrightness(compassesX, compassesY, 10)
         basic.pause(50);
-        led.plotBrightness(compassesX, compassesY, 30);
+        led.plotBrightness(compassesX, compassesY, 50);
         basic.pause(50);
-        led.plotBrightness(compassesX, compassesY, 50)
-        basic.pause(50);
-        led.plotBrightness(compassesX, compassesY, 70);
+        led.plotBrightness(compassesX, compassesY, 100)
         basic.pause(50);
     }
 })
@@ -352,7 +351,6 @@ function suggestDirection(possibleDirections: number[]) {
 }
 
 basic.forever(function () {
-    gameInProgress = true
     drawViewPort()
     drawGame()
     music.playTone(262, music.beat(BeatFraction.Eighth))
@@ -366,12 +364,12 @@ basic.forever(function () {
     if (!autoPlay) {
         newPosition = getNewPosition(headPosition, currentDirection)
         if (illegalPosition(newPosition)) {
-            gameOver();
+            return gameOver();
         }
     } else {
         let possibleDirections = getPossibleDirections()
         if (possibleDirections.length == 0) {
-            gameOver();
+            return gameOver();
         }
 
         let newdirection = suggestDirection(possibleDirections)
